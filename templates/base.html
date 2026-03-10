@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/requests.css' %}">
+</head>
+<body>
+    <nav>
+        {% block navbar %}
+
+        {% endblock navbar %}
+    </nav>
+
+    <main>
+        {% block content %}
+    
+        {% endblock content %}
+    </main>
+</body>
+</html>

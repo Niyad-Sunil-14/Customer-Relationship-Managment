@@ -1,0 +1,30 @@
+
+{% block navbar %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">MyDjangoApp</a>
+
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/about/" class="nav-link">About</a></li>
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'admin-dashboard' %}" class="nav-link">Admin Dashboard</a></li>
+                {% endif %}
+                
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-user">Welcome, {{ user.username }}</span>
+                    </li>
+                    <li>
+                        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-btn logout-btn">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="nav-btn login-btn">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+{% endblock navbar %}

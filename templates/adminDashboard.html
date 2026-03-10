@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+
+{% block navbar %}
+    {% include 'navbar.html' %}
+{% endblock navbar %}
+
+
+{% block content %}
+    <div>
+        <h3>Total Customers</h3> : <p>{{total_customers}}</p>
+    </div>
+
+    <div class="admin-container">
+        <div class="request-card">
+            <h2>Pending Approvals</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <table class="request-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Request Type</th>
+                        <th>Date Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                    <tr>
+                        <td>{{ req.username }}</td>
+                        <td>Staff</td>
+                        <td>{{ req.date_joined|date:"M d, Y" }}</td>
+                        <td class="action-buttons">
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ req.id }}">
+                                <button type="submit" name="approve" class="btn-approve">Approve</button>
+                            </form>
+                            
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ req.id }}">
+                                <button type="submit" name="reject" class="btn-reject">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 20px;">No pending requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}
