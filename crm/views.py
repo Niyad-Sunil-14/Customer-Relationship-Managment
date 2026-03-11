@@ -9,8 +9,19 @@ from . models import Customer
 
 def home(request):
     total_customers = Customer.objects.count()
-    
-    return render(request,'home.html')
+    unassigned_customers = Customer.objects.filter(assigned_user__isnull=True).count()
+    total_staff = User.objects.filter(is_active=True).count()
+    pending_approvals = User.objects.filter(is_active=False).count()
+    total_lead_converted = Customer.objects.filter(lead_status='converted').count()
+
+    context = {
+        'total_customers':total_customers,
+        'total_staff':total_staff,
+        'unassigned_customers':unassigned_customers,
+        'pending_approvals':pending_approvals,
+        'total_lead_converted':total_lead_converted,
+    }
+    return render(request,'home.html',context=context)
 
 
 def register(request):
@@ -63,32 +74,33 @@ def user_logout(request):
 
 
 
-def adminDashboard(request):
+def requests(request):
     if request.user.is_superuser:
         users = User.objects.filter(is_active = False)
-        total_customers = User.objects.count()
         if 'approve' in request.POST:
             id = request.POST.get('id')
             user = get_object_or_404(User,id = id)
             user.is_active = True
             user.save()
             messages.success(request, f"User {user.username} approved!")
-            return redirect('admin-dashboard')
+            return redirect('requests')
         
         elif 'reject' in request.POST:
             id = request.POST.get('id')
             user = get_object_or_404(User,id = id)
             user.delete()
             messages.success(request, f"User {user.username} rejected and removed.")
-            return redirect('admin-dashboard')
+            return redirect('requests')
     else:
         return redirect('login')
-    return render(request,'admin_dashboard.html',{'pending_requests':users,'total_customers':total_customers})
+    return render(request,'requests.html',{'pending_requests':users})
 
 
 
-def createCustomer(request):
+def create_customer(request):
     form = CustomerForm()
+    if not request.user.is_active:
+        return redirect('login')
 
     if not request.user.is_superuser:
         if 'assigned_user' in form.fields:
@@ -109,3 +121,12 @@ def createCustomer(request):
                     del form.fields['assigned_user']
          
     return render(request,'create_customer.html',{'form':form})
+
+
+
+def customer_list(request):
+    if request.user.is_superuser:
+        customer_list = Customer.objects.all()
+    else:
+        customer_list = Customer.objects.filter(assigned_user=request.user.id)
+    return render(request,'customer_list.html',{'customer_list':customer_list})

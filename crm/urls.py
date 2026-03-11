@@ -1,11 +1,12 @@
 from django.urls import path
-from . views import home,login_user,user_logout,register,adminDashboard,createCustomer
+from . views import home,login_user,user_logout,register,requests,create_customer,customer_list
 
 urlpatterns = [
     path('', home,name="home"),
     path('login/', login_user,name="login"),
     path('logout/', user_logout,name="logout"),
     path('register/', register,name="register"),
-    path('admin-dashboard/',adminDashboard,name="admin-dashboard"),
-    path('create-customer/',createCustomer,name="create-customer"),
+    path('requests/',requests,name="requests"),
+    path('create-customer/',create_customer,name="create-customer"),
+    path('customer-list/',customer_list,name="customer-list"),
 ]

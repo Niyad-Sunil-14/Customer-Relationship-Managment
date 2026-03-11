@@ -6,9 +6,22 @@
 
             <ul class="nav-menu">
                 <li><a href="/" class="nav-link">Home</a></li>
-                <li><a href="{% url 'create-customer' %}" class="nav-link">Create Customer</a></li>
-                {% if user.is_superuser %}
-                    <li><a href="{% url 'admin-dashboard' %}" class="nav-link">Admin Dashboard</a></li>
+                {% if user.is_active %}
+                    <li><a href="{% url 'create-customer' %}" class="nav-link">Create Customer</a></li>
+
+                    <li>
+                        <a href="{% url 'customer-list' %}" class="nav-link">
+                            {% if user.is_superuser %}
+                                All Customers
+                            {% elif user.is_active %}
+                                Your Customer
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    {% if user.is_superuser %}
+                        <li><a href="{% url 'requests' %}" class="nav-link">Requests</a></li>
+                    {% endif %}
                 {% endif %}
                 
                 {% if user.is_authenticated %}

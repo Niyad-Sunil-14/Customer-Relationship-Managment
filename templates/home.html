@@ -7,36 +7,51 @@
 
 
 {% block content %}
-    <div class="dashboard-page">
-        <h2>Admin Overview</h2>
-
-        <div class="admin-dashboard-summary">
-            <div class="summary-card card-total">
-                <h3>Total Customers</h3>
-                <div class="value">{{ total_customers }}</div>
-                <div class="subtitle">Database Total</div>
+    {% if request.user.is_superuser %}
+        <div class="wrapper">
+            <h3 class="dashboard-title">Dashboard</h3>
+            <div class="admin-dashboard-summary">
+                <div class="summary-card">
+                    <h3>Total Customers</h3>
+                    <div class="value"> {{total_customers}} </div>
+                    <div class="subtitle">System-wide records</div>
+                </div>
+        
+                <div class="summary-card card-unassigned">
+                    <h3>Unassigned Customers</h3>
+                    <div class="value"> {{unassigned_customers}} </div>
+                    <div class="subtitle">Needs to assign user</div>
+                </div>
+        
+                <div class="summary-card card-converted">
+                    <h3>Active Staff</h3>
+                    <div class="value"> {{total_staff}} </div>
+                    <div class="subtitle">Currently online</div>
+                </div>
             </div>
-
-            <div class="summary-card card-unassigned">
-                <h3>Unassigned</h3>
-                <div class="value">{{ unassigned_leads }}</div>
-                <div class="subtitle">Action Required</div>
-            </div>
-
-            <div class="summary-card card-staff">
-                <h3>Total Staff</h3>
-                <div class="value">{{ total_staff }}</div>
-                <div class="subtitle">Team Members</div>
-            </div>
-
-            <div class="summary-card card-converted">
-                <h3>Converted</h3>
-                <div class="value">{{ total_converted }}</div>
-                <div class="subtitle">Success Rate</div>
+        
+            <div class="admin-dashboard-summary">
+                <div class="summary-card">
+                    <h3>Unassigned Customers</h3>
+                    <div class="value"> {{unassigned_customers}} </div>
+                    <div class="subtitle">Needs to assign user</div>
+                </div>
+        
+                <div class="summary-card card-unassigned">
+                    <h3>Pending Approvals</h3>
+                    <div class="value"> {{pending_approvals}} </div>
+                    <div class="subtitle">Verify requests</div>
+                </div>
+        
+                <div class="summary-card card-converted">
+                    <h3>Total Lead Converted</h3>
+                    <div class="value">{{ total_lead_converted }}</div>
+                    <div class="subtitle">Goal completion</div>
+                </div>
             </div>
         </div>
-
-        <div class="table-container">
-            </div>
-    </div>
+    {% else %}
+        <h1>Not a superuser</h1>
+    {% endif %}
+    
 {% endblock content %}

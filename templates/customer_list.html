@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+    {% include 'navbar.html' %}
+{% endblock navbar %}
+
+
+{% block content %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Company</th>
+                    <th>Email</th>
+                    <th>Assigned User</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in customer_list %}
+                <tr>
+                    <td>{{item.name}}</td>
+                    <td>{{item.company}}</td>
+                    <td>{{item.email}}</td>
+                    <td>{{item.assigned_user|default:"Not Assigned"}}</td>
+                    <td><span class="badge status-{{item.lead_status}}">{{item.get_lead_status_display}}</span></td>
+                    <td class="action-group">
+                        <a href="#" class="action-btn btn-view" title="View Details">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+
+                        <a href="#" class="action-btn btn-edit" title="Edit Customer">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+
+                        {% if user.is_superuser %}
+                        <a href="#" class="action-btn btn-delete" title="Delete Customer">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
