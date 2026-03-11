@@ -7,5 +7,36 @@
 
 
 {% block content %}
-    <h1>Home Page</h1>
+    <div class="dashboard-page">
+        <h2>Admin Overview</h2>
+
+        <div class="admin-dashboard-summary">
+            <div class="summary-card card-total">
+                <h3>Total Customers</h3>
+                <div class="value">{{ total_customers }}</div>
+                <div class="subtitle">Database Total</div>
+            </div>
+
+            <div class="summary-card card-unassigned">
+                <h3>Unassigned</h3>
+                <div class="value">{{ unassigned_leads }}</div>
+                <div class="subtitle">Action Required</div>
+            </div>
+
+            <div class="summary-card card-staff">
+                <h3>Total Staff</h3>
+                <div class="value">{{ total_staff }}</div>
+                <div class="subtitle">Team Members</div>
+            </div>
+
+            <div class="summary-card card-converted">
+                <h3>Converted</h3>
+                <div class="value">{{ total_converted }}</div>
+                <div class="subtitle">Success Rate</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            </div>
+    </div>
 {% endblock content %}

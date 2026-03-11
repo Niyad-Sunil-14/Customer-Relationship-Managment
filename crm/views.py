@@ -1,12 +1,15 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from django.contrib.auth import authenticate, login,logout,user_logged_in
+from django.contrib.auth import authenticate, login,logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-
+from . forms import CustomerForm
+from . models import Customer
 # Create your views here.
 
 def home(request):
+    total_customers = Customer.objects.count()
+    
     return render(request,'home.html')
 
 
@@ -80,5 +83,29 @@ def adminDashboard(request):
             return redirect('admin-dashboard')
     else:
         return redirect('login')
-    return render(request,'adminDashboard.html',{'pending_requests':users,'total_customers':total_customers})
+    return render(request,'admin_dashboard.html',{'pending_requests':users,'total_customers':total_customers})
 
+
+
+def createCustomer(request):
+    form = CustomerForm()
+
+    if not request.user.is_superuser:
+        if 'assigned_user' in form.fields:
+            del form.fields['assigned_user']
+
+    if request.method == 'POST':
+        form = CustomerForm(request.POST)
+
+        if form.is_valid():
+            customer = form.save(commit=False)
+
+            customer.save()
+            messages.success(request,"Customer created successfully!")
+            return redirect('create-customer')
+        else:
+            if not request.user.is_superuser:
+                if 'assigned_user' in form.fields:
+                    del form.fields['assigned_user']
+         
+    return render(request,'create_customer.html',{'form':form})

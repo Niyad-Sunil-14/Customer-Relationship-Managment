@@ -1,0 +1,126 @@
+/* Layout Container - Centered and Fit to Screen */
+.crm-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 89vh; /* Lock to screen height */
+    background-color: #f3f4f6;
+    overflow: hidden; /* Prevent page scrolling */
+}
+
+.crm-form-container {
+    width: 95%;
+    max-width: 700px; /* Slightly narrower */
+    padding: 1.25rem; /* Reduced from 2.5rem */
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.crm-form-container h2 {
+    margin-top: 0;
+    margin-bottom: 1rem; /* Reduced from 2rem */
+    color: #1a1a1a;
+    font-size: 1.2rem; /* Smaller title */
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+/* The Grid System - Tighter Gaps */
+.crm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 15px; /* Reduced vertical gap to 10px */
+}
+
+label {
+    font-size: 0.7rem; /* Smaller labels */
+    font-weight: 700;
+    color: #4b5563;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input, select {
+    padding: 8px 10px; /* Slimmer inputs */
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: #f9fafb;
+}
+
+/* Button Styling - More Compact */
+.form-actions {
+    margin-top: 15px; /* Reduced from 30px */
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+}
+
+.btn {
+    padding: 10px 15px; /* Smaller button padding */
+    font-size: 0.9rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-save {
+    background: #2563eb;
+    color: white;
+    border: none;
+    flex: 2;
+}
+
+.btn-cancel {
+    background: #fff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    flex: 1;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* Responsive: Single column on short screens or small devices */
+@media (max-height: 600px) {
+    .crm-form-container { padding: 0.8rem; }
+    .crm-grid { gap: 5px 10px; }
+}
+
+
+/* Styling the specific Django form errors */
+.errorlist {
+    padding: 10px;
+    margin: 0;
+    color: #dc2626; /* Red */
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Ensure the input box turns red too */
+.form-group input.is-invalid {
+    border-color: #dc2626;
+}
+
+
+/* Force the Django <p> tags to behave like grid cells */
+.crm-grid p {
+    margin: 0; /* Remove default paragraph spacing */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure inputs inside those paragraphs take full width of the column */
+.crm-grid p input, 
+.crm-grid p select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* If you have an odd number of fields, make the last one span full width */
+.crm-grid p:last-child {
+    grid-column: span 1; 
+}
