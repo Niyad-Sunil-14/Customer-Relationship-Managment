@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from . forms import CustomerForm
 from . models import Customer
+from django.db.models import Q
+from django.core.paginator import Paginator
 # Create your views here.
 
 def home(request):
@@ -126,11 +128,39 @@ def customer_list(request):
     if not request.user.is_active:
         return redirect('login')
 
+    status_value = request.GET.get('status','all_category')
+    customer_filter = request.GET.get('customer_filter','all')
     if request.user.is_superuser:
-        customer_list = Customer.objects.all()
+        if customer_filter == 'assigned':
+            customer_list = Customer.objects.filter(assigned_user__isnull=False)
+        elif customer_filter == 'unassigned':
+            customer_list = Customer.objects.filter(assigned_user__isnull=True)
+        elif status_value == 'new':
+            customer_list = Customer.objects.filter(lead_status=status_value)
+        elif status_value == 'contacted':
+            customer_list = Customer.objects.filter(lead_status=status_value)
+        elif status_value == 'follow_up':
+            customer_list = Customer.objects.filter(lead_status=status_value)
+        elif status_value == 'converted':
+            customer_list = Customer.objects.filter(lead_status=status_value)
+        elif status_value == 'lost':
+            customer_list = Customer.objects.filter(lead_status=status_value)
+        else:
+            customer_list = Customer.objects.all()
     else:
-        customer_list = Customer.objects.filter(assigned_user=request.user.id)
-    return render(request,'customer_list.html',{'customer_list':customer_list})
+        if status_value == 'new':
+            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
+        elif status_value == 'contacted':
+            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
+        elif status_value == 'follow_up':
+            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
+        elif status_value == 'converted':
+            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
+        elif status_value == 'lost':
+            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
+        else:
+            customer_list = Customer.objects.filter(assigned_user=request.user.id)
+    return render(request,'customer_list.html',{'customer_list':customer_list,'active_filter':customer_filter,'active_status_value':status_value})
 
 
 
@@ -160,3 +190,10 @@ def edit_customer(request,id):
                     del form.fields['assigned_user']
 
     return render(request,'edit_customer.html',{'form':form})
+
+
+
+def delete_customer(request,id):
+    customer = get_object_or_404(Customer,id=id)
+    customer.delete()
+    return redirect('customer-list')

@@ -6,29 +6,50 @@
 
 
 {% block content %}
-    {% if user.is_superuser %}
+    {% if user.is_superuser or user.is_active %}
         <h3 class="dashboard-title">All Customer</h3>
-        <div class="filter-group">
-            <label class="filter-item">
-                <div class="radio">
-                    <input type="radio" name="customer_filter" value="all" checked>
-                    <small class="fw-bold">All</small>
-                </div>
-            </label>
 
-            <label class="filter-item">
-                <div class="radio">
-                    <input type="radio" name="customer_filter" value="assigned">
-                    <small class="fw-bold">Assigned</small>
-                </div>
-            </label>
+        <div class="{% if user.super_user %} filter-toolbar {% else %} filter-toolbar2 {% endif %}">
+            <div class="toolbar-item">
+                <form method="get" action="{% url 'customer-list' %}">
+                    <select class="custom-select" name="status"  onchange="this.form.submit()">
+                        <option value="all_category" {% if active_status_value == 'all_category' %}selected{% endif %}>All Categories</option>
+                        <option value="new" {% if active_status_value == 'new' %}selected{% endif %}>New</option>
+                        <option value="contacted" {% if active_status_value == 'contacted' %}selected{% endif %}>Contacted</option>
+                        <option value="follow_up" {% if active_status_value == 'follow_up' %}selected{% endif %}>Follow Up</option>
+                        <option value="converted" {% if active_status_value == 'converted' %}selected{% endif %}>Converted</option>
+                        <option value="lost" {% if active_status_value == 'lost' %}selected{% endif %}>Lost</option>
+                    </select>
+                </form>
+            </div>
 
-            <label class="filter-item">
-                <div class="radio">
-                    <input type="radio" name="customer_filter" value="unassigned">
-                    <small class="fw-bold">Unassigned</small>
+            {% if user.is_superuser %}
+                <div class="toolbar-item" style="padding-left: 8rem;">
+                    <form method="get" action="{% url 'customer-list' %}" class="radio-group">
+                        <label class="radio-label">
+                            <input onchange="this.form.submit()" type="radio" name="customer_filter" value="all" {% if active_filter == 'all' %} checked {% endif %}>
+                            <span>All</span>
+                        </label>
+
+                        <label class="radio-label">
+                            <input type="radio" onchange="this.form.submit()" name="customer_filter" value="assigned" {% if active_filter == 'assigned' %} checked {% endif %}>
+                            <span>Assigned</span>
+                        </label>
+
+                        <label class="radio-label">
+                            <input type="radio" onchange="this.form.submit()" name="customer_filter" value="unassigned" {% if active_filter == 'unassigned' %} checked {% endif %}>
+                            <span>Unassigned</span>
+                        </label>
+                    </form>
                 </div>
-            </label>
+            {% endif %}
+
+            <div class="toolbar-item">
+                <div class="search-container">
+                    <input type="text" placeholder="Search leads..." class="search-input">
+                    <button class="search-btn">Search</button>
+                </div>
+            </div>
         </div>
     {% else %}
         <h3 class="dashboard-title">Your Customer</h3>
@@ -36,7 +57,7 @@
 
 
 
-    <div class="{% if request.user.is_superuser %} table-wrapper {% else %} table-wrapper2 {% endif %}">
+    <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -66,14 +87,14 @@
                         </a>
                         
                         {% if user.is_superuser %}
-                        <a href="#" class="action-btn btn-delete" title="Delete Customer">
+                       <button type="button" data-bs-toggle="modal" data-bs-target="#delete{{item.id}}" class="action-btn btn-delete" title="Delete Customer">
                             <i class="fa-regular fa-trash-can"></i>
-                        </a>
+                       </button>
                         {% endif %}
                     </td>
                 </tr>
                 
-                <!-- Modal -->
+                <!-- Modal for view -->
                 <div class="modal fade" id="exampleModal{{item.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered"> <div class="modal-content border-0 shadow-lg"> <div class="modal-header bg-dark text-white py-3">
                                 <h5 class="modal-title d-flex align-items-center" id="exampleModalLabel">
@@ -134,6 +155,30 @@
 
                             <div class="modal-footer border-0">
                                 <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal for delete -->
+                <div class="modal fade" id="delete{{item.id}}" tabindex="-1" aria-labelledby="delete" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete <strong>{{item.name}}</strong>?</p>
+                                <p class="text-danger small">This action cannot be undone.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                
+                                <form action="{% url 'delete-customer' item.id %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                </form>
                             </div>
                         </div>
                     </div>
