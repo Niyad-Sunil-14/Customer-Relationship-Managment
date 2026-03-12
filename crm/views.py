@@ -110,9 +110,7 @@ def create_customer(request):
         form = CustomerForm(request.POST)
 
         if form.is_valid():
-            customer = form.save(commit=False)
-
-            customer.save()
+            form.save()
             messages.success(request,"Customer created successfully!")
             return redirect('create-customer')
         else:
@@ -125,8 +123,40 @@ def create_customer(request):
 
 
 def customer_list(request):
+    if not request.user.is_active:
+        return redirect('login')
+
     if request.user.is_superuser:
         customer_list = Customer.objects.all()
     else:
         customer_list = Customer.objects.filter(assigned_user=request.user.id)
     return render(request,'customer_list.html',{'customer_list':customer_list})
+
+
+
+def edit_customer(request,id):
+    data = get_object_or_404(Customer,id=id)
+    form = CustomerForm(instance=data)
+
+    if not request.user.is_active:
+        return redirect('login')
+    
+    if not request.user.is_superuser:
+        if 'assigned_user' in form.fields:
+            del form.fields['assigned_user']
+
+    if request.method == 'POST':
+        form = CustomerForm(request.POST,instance=data)
+        if form.is_valid():
+            customer = form.save(commit=False)
+            if not request.user.is_superuser:
+                customer.assigned_user = request.user
+            customer.save()
+            messages.success(request,"Customer updated successfully!")
+            return redirect('edit-customer',id)
+        else:
+            if not request.user.is_superuser:
+                if 'assigned_user' in form.fields:
+                    del form.fields['assigned_user']
+
+    return render(request,'edit_customer.html',{'form':form})

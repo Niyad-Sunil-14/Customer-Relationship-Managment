@@ -6,7 +6,37 @@
 
 
 {% block content %}
-    <div class="table-wrapper">
+    {% if user.is_superuser %}
+        <h3 class="dashboard-title">All Customer</h3>
+        <div class="filter-group">
+            <label class="filter-item">
+                <div class="radio">
+                    <input type="radio" name="customer_filter" value="all" checked>
+                    <small class="fw-bold">All</small>
+                </div>
+            </label>
+
+            <label class="filter-item">
+                <div class="radio">
+                    <input type="radio" name="customer_filter" value="assigned">
+                    <small class="fw-bold">Assigned</small>
+                </div>
+            </label>
+
+            <label class="filter-item">
+                <div class="radio">
+                    <input type="radio" name="customer_filter" value="unassigned">
+                    <small class="fw-bold">Unassigned</small>
+                </div>
+            </label>
+        </div>
+    {% else %}
+        <h3 class="dashboard-title">Your Customer</h3>
+    {% endif %}
+
+
+
+    <div class="{% if request.user.is_superuser %} table-wrapper {% else %} table-wrapper2 {% endif %}">
         <table>
             <thead>
                 <tr>
@@ -27,21 +57,87 @@
                     <td>{{item.assigned_user|default:"Not Assigned"}}</td>
                     <td><span class="badge status-{{item.lead_status}}">{{item.get_lead_status_display}}</span></td>
                     <td class="action-group">
-                        <a href="#" class="action-btn btn-view" title="View Details">
-                            <i class="fa-solid fa-eye"></i>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{item.id}}" class="action-btn btn-view" title="View Details">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                        
+                        <a href="{% url 'edit-customer' item.id %}" class="action-btn btn-edit" title="Edit Customer">
+                            <i class="fa-regular fa-pen-to-square"></i>
                         </a>
-
-                        <a href="#" class="action-btn btn-edit" title="Edit Customer">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </a>
-
+                        
                         {% if user.is_superuser %}
                         <a href="#" class="action-btn btn-delete" title="Delete Customer">
-                            <i class="fa-solid fa-trash-can"></i>
+                            <i class="fa-regular fa-trash-can"></i>
                         </a>
                         {% endif %}
                     </td>
                 </tr>
+                
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal{{item.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered"> <div class="modal-content border-0 shadow-lg"> <div class="modal-header bg-dark text-white py-3">
+                                <h5 class="modal-title d-flex align-items-center" id="exampleModalLabel">
+                                    <i class="fa-solid fa-user-circle me-2"></i> Profile: {{item.name}}
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div class="row g-3"> <div class="col-12 border-bottom pb-3 mb-2">
+                                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Customer ID</small>
+                                        <p class="mb-0 fw-bold text-primary">#{{item.id}}</p>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="text-muted small d-block">Email</label>
+                                        <span class="fw-semibold text-break">{{item.email}}</span>
+                                    </div>
+
+                                    <div class="col-6 text-end">
+                                        <label class="text-muted small d-block">Phone</label>
+                                        <span class="fw-semibold">{{item.phone}}</span>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="text-muted small d-block">Company</label>
+                                        <span class="fw-semibold"><i class="fa-solid fa-building me-1 text-secondary"></i> {{item.company}}</span>
+                                    </div>
+
+                                    <div class="col-6 text-end">
+                                        <label class="text-muted small d-block">Category</label>
+                                        <span class="badge bg-info text-dark">{{item.favorite_category}}</span>
+                                    </div>
+
+                                    <hr class="my-3 opacity-10">
+
+                                    <div class="col-12 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <label class="text-muted small d-block">Lead Status</label>
+                                            <span class="badge status-{{item.lead_status}} p-2">
+                                                {{item.get_lead_status_display}}
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <label class="text-muted small d-block">Assigned To</label>
+                                            <span class="fw-bold text-dark">
+                                                <i class="fa-solid fa-user-tie me-1"></i> {{item.assigned_user|default:"Unassigned"}}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 mt-3 bg-light p-2 rounded text-center">
+                                        <small class="text-muted">Member since: <strong>{{item.created_at|date:"M d, Y"}}</strong></small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
             </tbody>
         </table>

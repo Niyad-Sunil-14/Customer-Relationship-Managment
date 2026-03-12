@@ -9,7 +9,7 @@
 {% block content %}
     <div class="crm-wrapper">
         <div class="crm-form-container">
-            <h2>New Customer</h2>
+            <h2>Edit Customer</h2>
 
             {% if messages %}
                 {% for message in messages %}
@@ -31,7 +31,7 @@
                     {% endfor %}
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-save">Create Customer</button>
+                    <button type="submit" class="btn btn-primary btn-save">Update Customer</button>
                     <a href="{% url 'home' %}" class="btn btn-cancel btn-outline-danger">Cancel</a>
                 </div>
             </form>
