@@ -7,7 +7,13 @@
 
 {% block content %}
     {% if user.is_superuser or user.is_active %}
-        <h3 class="dashboard-title">All Customer</h3>
+        <h3 class="dashboard-title">
+            {% if user.is_superuser %}
+                All Customer
+            {% else %}
+                Your Customer
+            {% endif %}
+        </h3>
 
         <div class="{% if user.super_user %} filter-toolbar {% else %} filter-toolbar2 {% endif %}">
             <div class="toolbar-item">
@@ -52,11 +58,11 @@
             </div>
         </div>
     {% else %}
-        <h3 class="dashboard-title">Your Customer</h3>
+        <h3 class="dashboard-title"></h3>
     {% endif %}
 
 
-
+    <!-- Customer List -->
     <div class="table-wrapper">
         <table>
             <thead>
@@ -186,5 +192,22 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <!-- Paginator -->
+    <div class="pagination-container">
+        {% if customer_list.has_previous %}
+            <a href="?page=1" class="page-link">&laquo; First</a>
+            <a href="?page={{ customer_list.previous_page_number }}" class="page-link">Previous</a>
+        {% endif %}
+
+        <span class="page-link active">
+            Page {{ customer_list.number }} of {{ customer_list.paginator.num_pages }}
+        </span>
+
+        {% if customer_list.has_next %}
+            <a href="?page={{ customer_list.next_page_number }}" class="page-link">Next</a>
+            <a href="?page={{ customer_list.paginator.num_pages }}" class="page-link">Last &raquo;</a>
+        {% endif %}
     </div>
 {% endblock content %}

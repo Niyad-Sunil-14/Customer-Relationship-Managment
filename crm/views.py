@@ -12,7 +12,7 @@ from django.core.paginator import Paginator
 def home(request):
     total_customers = Customer.objects.count()
     unassigned_customers = Customer.objects.filter(assigned_user__isnull=True).count()
-    total_staff = User.objects.filter(is_active=True).count()
+    total_staff = User.objects.filter(Q(is_active=True),Q(is_superuser=False)).count()
     pending_approvals = User.objects.filter(is_active=False).count()
     total_lead_converted = Customer.objects.filter(lead_status='converted').count()
 
@@ -77,25 +77,38 @@ def user_logout(request):
 
 
 def requests(request):
+    page=request.GET.get('filter','approval')
     if request.user.is_superuser:
-        users = User.objects.filter(is_active = False)
-        if 'approve' in request.POST:
-            id = request.POST.get('id')
-            user = get_object_or_404(User,id = id)
-            user.is_active = True
-            user.save()
-            messages.success(request, f"User {user.username} approved!")
-            return redirect('requests')
-        
-        elif 'reject' in request.POST:
-            id = request.POST.get('id')
-            user = get_object_or_404(User,id = id)
-            user.delete()
-            messages.success(request, f"User {user.username} rejected and removed.")
-            return redirect('requests')
+        if page == 'approval':
+            users = User.objects.filter(is_active = False)
+            if 'approve' in request.POST:
+                id = request.POST.get('id')
+                user = get_object_or_404(User,id = id)
+                user.is_active = True
+                user.save()
+                messages.success(request, f"User {user.username} approved!")
+                return redirect('requests')
+            
+            elif 'reject' in request.POST:
+                id = request.POST.get('id')
+                user = get_object_or_404(User,id = id)
+                user.delete()
+                messages.success(request, f"User {user.username} rejected and removed.")
+                return redirect('requests')
+        elif page == 'assignment':
+            users = Customer.objects.filter(assigned_user__isnull=True)
+            user_list = User.objects.filter(Q(is_superuser=False),Q(is_active=True))
+            if request.method == 'POST':
+                user_id = request.POST.get('id')
+                customer_id = request.POST.get('customer_id')
+                get_customer=get_object_or_404(Customer,id=customer_id)
+                get_customer.assigned_user = User.objects.get(id=user_id)
+                get_customer.save()
+                messages.success(request,f"Assigned to {get_customer.assigned_user.username} successfully!")
+            return render(request,'requests.html',{'pending_requests':users,"active_filter":page,'user_list':user_list})
     else:
         return redirect('login')
-    return render(request,'requests.html',{'pending_requests':users})
+    return render(request,'requests.html',{'pending_requests':users,"active_filter":page})
 
 
 
@@ -160,7 +173,11 @@ def customer_list(request):
             customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
         else:
             customer_list = Customer.objects.filter(assigned_user=request.user.id)
-    return render(request,'customer_list.html',{'customer_list':customer_list,'active_filter':customer_filter,'active_status_value':status_value})
+
+    paginator = Paginator(customer_list,8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request,'customer_list.html',{'customer_list':page_obj,'active_filter':customer_filter,'active_status_value':status_value})
 
 
 

@@ -231,3 +231,39 @@ tr:hover {
     border-radius: 4px 0 0 4px;
     border-right: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.page-link {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.page-link.active {
+    background-color: #333;
+    color: white;
+    border-color: #333;
+}
+
+.page-link:hover:not(.active) {
+    background-color: #f0f0f0;
+}

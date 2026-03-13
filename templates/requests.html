@@ -7,7 +7,21 @@
 
 
 {% block content %}
-    <h3 class="dashboard-title">Pending Requests</h3>
+    <div class="toolbar-item" style="justify-content: center;margin-top: 2rem;">
+        <form method="get" action="{% url 'requests' %}" class="radio-group">
+            <label class="radio-label">
+                <input onchange="this.form.submit()" type="radio" name="filter" value="approval" {% if active_filter == 'approval' %} checked {% endif %}>
+                <span>User Approvals</span>
+            </label>
+
+            <label class="radio-label">
+                <input type="radio" onchange="this.form.submit()" name="filter" value="assignment" {% if active_filter == 'assignment' %} checked {% endif %}>
+                <span>User Assignments</span>
+            </label>
+        </form>
+    </div>
+
+    {% if active_filter == 'approval' %}
     <div class="admin-container">
         <div class="request-card">
             <h2>Pending Approvals</h2>
@@ -56,4 +70,64 @@
             </table>
         </div>
     </div>
+    {% else %}
+    <div class="admin-container">
+        <div class="request-card">
+            <h2>Pending Customer List</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <table class="request-table">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Company</th>
+                        <th>Category</th>
+                        <th>Request Date</th>
+                        <th>Assign User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                    <form method="POST" action="{% url 'requests' %}?filter=assignment">
+                        <tr>
+                            <input type="hidden" value="{{req.id}}" name="customer_id">
+                            <td>{{ req.name }}</td>
+                            <td>{{ req.company }}</td>
+                            <td>{{ req.favorite_category }}</td>
+                            <td>{{ req.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <form method="POST" class="assignment-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="customer_id" value="{{ req.id }}">
+                                    
+                                    <select name="id" class="styled-select" required>
+                                        <option value="" disabled selected>Select a user...</option>
+                                        {% for user in user_list %}
+                                            <option value="{{ user.id }}">{{ user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    
+                                    <button type="submit" class="btn-assign">
+                                        Assign
+                                    </button>
+                                </form>
+                            </td>                        
+                        </tr>
+                    </form>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 20px;">No pending requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
 {% endblock content %}
