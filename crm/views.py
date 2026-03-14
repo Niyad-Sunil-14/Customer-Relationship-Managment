@@ -166,44 +166,25 @@ def customer_list(request):
         customer.lead_status = updated_status_value
         customer.save()
 
-    status_value = request.GET.get('status','all_category')
-    customer_filter = request.GET.get('customer_filter','all')
     if request.user.is_superuser:
-        value=8
-        if customer_filter == 'assigned':
-            customer_list = Customer.objects.filter(assigned_user__isnull=False)
-        elif customer_filter == 'unassigned':
-            customer_list = Customer.objects.filter(assigned_user__isnull=True)
-        elif status_value == 'new':
-            customer_list = Customer.objects.filter(lead_status=status_value)
-        elif status_value == 'contacted':
-            customer_list = Customer.objects.filter(lead_status=status_value)
-        elif status_value == 'follow_up':
-            customer_list = Customer.objects.filter(lead_status=status_value)
-        elif status_value == 'converted':
-            customer_list = Customer.objects.filter(lead_status=status_value)
-        elif status_value == 'lost':
-            customer_list = Customer.objects.filter(lead_status=status_value)
-        else:
-            customer_list = Customer.objects.all()
+        customers = Customer.objects.all()
+        items_per_page = 8
     else:
-        if status_value == 'new':
-            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
-        elif status_value == 'contacted':
-            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
-        elif status_value == 'follow_up':
-            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
-        elif status_value == 'converted':
-            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
-        elif status_value == 'lost':
-            customer_list = Customer.objects.filter(Q(lead_status=status_value) & Q(assigned_user=request.user))
-        else:
-            customer_list = Customer.objects.filter(assigned_user=request.user.id)
+        customers = Customer.objects.filter(assigned_user=request.user)
+        items_per_page = 6
 
-    if not request.user.is_superuser:
-        value = 6
+    status_value = request.GET.get('status', 'all_category')
+    customer_filter = request.GET.get('customer_filter', 'all')
 
-    paginator = Paginator(customer_list,value)
+    if customer_filter == 'assigned':
+        customers = customers.filter(assigned_user__isnull=False)
+    elif customer_filter == 'unassigned':
+        customers = customers.filter(assigned_user__isnull=True)
+
+    if status_value in ['new', 'contacted', 'follow_up', 'converted', 'lost']:
+        customers = customers.filter(lead_status=status_value)
+
+    paginator = Paginator(customers,items_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request,'customer_list.html',{'customer_list':page_obj,'active_filter':customer_filter,'active_status_value':status_value})

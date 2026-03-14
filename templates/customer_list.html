@@ -18,6 +18,7 @@
         <div class="{% if user.super_user %} filter-toolbar {% else %} filter-toolbar2 {% endif %}">
             <div class="toolbar-item">
                 <form method="get" action="{% url 'customer-list' %}">
+                    <input type="hidden" name="customer_filter" value="{{ active_filter }}">
                     <select class="custom-select" name="status"  onchange="this.form.submit()">
                         <option value="all_category" {% if active_status_value == 'all_category' %}selected{% endif %}>All Categories</option>
                         <option value="new" {% if active_status_value == 'new' %}selected{% endif %}>New</option>
@@ -32,6 +33,7 @@
             {% if user.is_superuser %}
                 <div class="toolbar-item" style="padding-left: 8rem;">
                     <form method="get" action="{% url 'customer-list' %}" class="radio-group">
+                        <input type="hidden" name="status" value="{{ active_status_value }}">
                         <label class="radio-label">
                             <input onchange="this.form.submit()" type="radio" name="customer_filter" value="all" {% if active_filter == 'all' %} checked {% endif %}>
                             <span>All</span>
@@ -222,8 +224,8 @@
     <!-- Paginator -->
     <div class="pagination-container">
         {% if customer_list.has_previous %}
-            <a href="?page=1" class="page-link">&laquo; First</a>
-            <a href="?page={{ customer_list.previous_page_number }}" class="page-link">Previous</a>
+            <a href="?page=1&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">&laquo; First</a>
+            <a href="?page={{ customer_list.previous_page_number }}&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">Previous</a>
         {% endif %}
 
         <span class="page-link active">
@@ -231,8 +233,8 @@
         </span>
 
         {% if customer_list.has_next %}
-            <a href="?page={{ customer_list.next_page_number }}" class="page-link">Next</a>
-            <a href="?page={{ customer_list.paginator.num_pages }}" class="page-link">Last &raquo;</a>
+            <a href="?page={{ customer_list.next_page_number }}&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">Next</a>
+            <a href="?page={{ customer_list.paginator.num_pages }}&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">Last &raquo;</a>
         {% endif %}
     </div>
 {% endblock content %}
