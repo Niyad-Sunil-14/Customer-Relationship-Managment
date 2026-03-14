@@ -10,19 +10,37 @@ from django.core.paginator import Paginator
 # Create your views here.
 
 def home(request):
-    total_customers = Customer.objects.count()
-    unassigned_customers = Customer.objects.filter(assigned_user__isnull=True).count()
-    total_staff = User.objects.filter(Q(is_active=True),Q(is_superuser=False)).count()
-    pending_approvals = User.objects.filter(is_active=False).count()
-    total_lead_converted = Customer.objects.filter(lead_status='converted').count()
+    if request.user.is_superuser:
+        total_customers = Customer.objects.count()
+        unassigned_customers = Customer.objects.filter(assigned_user__isnull=True).count()
+        total_staff = User.objects.filter(Q(is_active=True),Q(is_superuser=False)).count()
+        pending_approvals = User.objects.filter(is_active=False).count()
+        total_lead_converted = Customer.objects.filter(lead_status='converted').count()
+        lead_lost = Customer.objects.filter(lead_status='lost').count()
 
-    context = {
-        'total_customers':total_customers,
-        'total_staff':total_staff,
-        'unassigned_customers':unassigned_customers,
-        'pending_approvals':pending_approvals,
-        'total_lead_converted':total_lead_converted,
-    }
+        context = {
+            'total_customers':total_customers,
+            'total_staff':total_staff,
+            'unassigned_customers':unassigned_customers,
+            'pending_approvals':pending_approvals,
+            'total_lead_converted':total_lead_converted,
+            'lead_lost':lead_lost,
+        }
+    else:
+        your_customers = Customer.objects.filter(assigned_user=request.user).count()
+        follow_ups = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='follow_up')).count()
+        new_lead = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='new')).count()
+        lead_lost = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='lost')).count()
+        lead_converted = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='converted')).count()
+
+        context ={
+            'your_customers':your_customers,
+            'follow_ups':follow_ups,
+            'new_lead':new_lead,
+            'lead_lost':lead_lost,
+            'lead_converted':lead_converted,
+        }
+
     return render(request,'home.html',context=context)
 
 
@@ -140,10 +158,18 @@ def create_customer(request):
 def customer_list(request):
     if not request.user.is_active:
         return redirect('login')
+    
+    if request.method == 'POST':
+        updated_status_value = request.POST.get('new_status')
+        customer_id = request.POST.get('customer_id')
+        customer=get_object_or_404(Customer,id=customer_id)
+        customer.lead_status = updated_status_value
+        customer.save()
 
     status_value = request.GET.get('status','all_category')
     customer_filter = request.GET.get('customer_filter','all')
     if request.user.is_superuser:
+        value=8
         if customer_filter == 'assigned':
             customer_list = Customer.objects.filter(assigned_user__isnull=False)
         elif customer_filter == 'unassigned':
@@ -174,7 +200,10 @@ def customer_list(request):
         else:
             customer_list = Customer.objects.filter(assigned_user=request.user.id)
 
-    paginator = Paginator(customer_list,8)
+    if not request.user.is_superuser:
+        value = 6
+
+    paginator = Paginator(customer_list,value)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request,'customer_list.html',{'customer_list':page_obj,'active_filter':customer_filter,'active_status_value':status_value})

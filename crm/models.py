@@ -3,13 +3,6 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
-LEAD_STATUS = [
-    ('new', 'New'),
-    ('contacted', 'Contacted'),
-    ('follow_up', 'Follow Up'),
-    ('converted', 'Converted'),
-    ('lost', 'Lost'),
-]
 
 CATEGORY_CHOICES = [
     ('product', 'Product'),
@@ -17,6 +10,13 @@ CATEGORY_CHOICES = [
 ]
 
 class Customer(models.Model):
+    LEAD_STATUS = [
+        ('new', 'New'),
+        ('contacted', 'Contacted'),
+        ('follow_up', 'Follow Up'),
+        ('converted', 'Converted'),
+        ('lost', 'Lost'),
+    ]
     name =  models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone = models.IntegerField()

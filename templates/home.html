@@ -32,15 +32,15 @@
         
             <div class="admin-dashboard-summary">
                 <div class="summary-card">
-                    <h3>Unassigned Customers</h3>
-                    <div class="value"> {{unassigned_customers}} </div>
-                    <div class="subtitle">Needs to assign user</div>
+                    <h3>Pending User Approvals</h3>
+                    <div class="value"> {{pending_approvals}} </div>
+                    <div class="subtitle">Verify requests</div>
                 </div>
         
                 <div class="summary-card card-unassigned">
-                    <h3>Pending Approvals</h3>
-                    <div class="value"> {{pending_approvals}} </div>
-                    <div class="subtitle">Verify requests</div>
+                    <h3>Total Lead Lost</h3>
+                    <div class="value"> {{lead_lost}} </div>
+                    <div class="subtitle">Discontinued Opportunities</div>
                 </div>
         
                 <div class="summary-card card-converted">
@@ -51,7 +51,48 @@
             </div>
         </div>
     {% else %}
-        <h1>Not a superuser</h1>
+        <div class="wrapper">
+            <h3 class="dashboard-title">Dashboard</h3>
+            <div class="admin-dashboard-summary">
+                <div class="summary-card">
+                    <h3>Your Customers</h3>
+                    <div class="value"> {{your_customers}} </div>
+                    <div class="subtitle">Your total clients</div>
+                </div>
+        
+                <div class="summary-card card-unassigned">
+                    <h3>Follow Ups Pending</h3>
+                    <div class="value"> {{follow_ups}} </div>
+                    <div class="subtitle">Assistence needed</div>
+                </div>
+        
+                <div class="summary-card card-converted">
+                    <h3>New Lead</h3>
+                    <div class="value"> {{new_lead}} </div>
+                    <div class="subtitle">Connect to your new lead</div>
+                </div>
+            </div>
+        
+            <div class="admin-dashboard-summary">
+                <div class="summary-card">
+                    <h3>Unassigned Customers</h3>
+                    <div class="value"> {{unassigned_customers}} </div>
+                    <div class="subtitle">Needs to assign user</div>
+                </div>
+        
+                <div class="summary-card card-unassigned">
+                    <h3>Lead Lost</h3>
+                    <div class="value"> {{lead_lost}} </div>
+                    <div class="subtitle">Discontinued Opportunities</div>
+                </div>
+        
+                <div class="summary-card card-converted">
+                    <h3>Lead Converted</h3>
+                    <div class="value">{{ lead_converted }}</div>
+                    <div class="subtitle">Goal completion</div>
+                </div>
+            </div>
+        </div>
     {% endif %}
     
 {% endblock content %}

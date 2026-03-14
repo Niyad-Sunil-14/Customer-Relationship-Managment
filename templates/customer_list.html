@@ -70,7 +70,11 @@
                     <th>Customer Name</th>
                     <th>Company</th>
                     <th>Email</th>
-                    <th>Assigned User</th>
+                    {% if user.is_superuser %}
+                        <th>Assigned User</th>
+                    {% else %}
+                        <th>Phone</th>
+                    {% endif %}
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -81,8 +85,29 @@
                     <td>{{item.name}}</td>
                     <td>{{item.company}}</td>
                     <td>{{item.email}}</td>
-                    <td>{{item.assigned_user|default:"Not Assigned"}}</td>
-                    <td><span class="badge status-{{item.lead_status}}">{{item.get_lead_status_display}}</span></td>
+                    {% if not user.is_superuser %}
+                        <td>{{item.phone}}</td>
+                        <td>
+                            <form method="POST" action="{% url 'customer-list' %}?page={{customer_list.number}}" class="status-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="customer_id" value="{{item.id}}">
+                                <select name="new_status" onchange="this.form.submit()" class="status-select status-{{item.lead_status}}">
+                                    {% for code, name in item.LEAD_STATUS %}
+                                        <option value="{{ code }}" {% if item.lead_status == code %}selected{% endif %}>
+                                            {{ name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </td>
+                    {% else %}
+                        <td>{{item.assigned_user|default:"Not Assigned"}}</td>
+                        <td>
+                            <span class="badge status-{{item.lead_status}}">
+                                {{item.get_lead_status_display}}
+                            </span>
+                        </td>
+                    {% endif %}
                     <td class="action-group">
                         <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{item.id}}" class="action-btn btn-view" title="View Details">
                             <i class="fa-regular fa-eye"></i>
