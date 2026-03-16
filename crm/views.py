@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from . forms import CustomerForm
-from . models import Customer
+from . models import Customer,Interaction
 from django.db.models import Q
 from django.core.paginator import Paginator
 # Create your views here.
@@ -160,15 +160,26 @@ def customer_list(request):
         return redirect('login')
     
     if request.method == 'POST':
-        updated_status_value = request.POST.get('new_status')
-        customer_id = request.POST.get('customer_id')
-        customer=get_object_or_404(Customer,id=customer_id)
-        customer.lead_status = updated_status_value
-        customer.save()
+        if 'new_status' in request.POST:
+            updated_status_value = request.POST.get('new_status')
+            customer_id = request.POST.get('customer_id')
+            customer=get_object_or_404(Customer,id=customer_id)
+            customer.lead_status = updated_status_value
+            customer.save()
+        elif 'note_body' in request.POST:
+            get_note = request.POST.get('note_body')
+            customer_id = request.POST.get('customer_id')
+            customer = get_object_or_404(Customer,id=customer_id)
+            Interaction.objects.create(
+                customer = customer,
+                note = get_note
+            )
+            previous_url = request.META.get('HTTP_REFERER')
+            return redirect(previous_url)
 
     if request.user.is_superuser:
         customers = Customer.objects.all()
-        items_per_page = 8
+        items_per_page = 7
     else:
         customers = Customer.objects.filter(assigned_user=request.user)
         items_per_page = 6

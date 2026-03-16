@@ -77,6 +77,7 @@
                     {% else %}
                         <th>Phone</th>
                     {% endif %}
+                    <th>Notes</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -90,7 +91,15 @@
                     {% if not user.is_superuser %}
                         <td>{{item.phone}}</td>
                         <td>
-                            <form method="POST" action="{% url 'customer-list' %}?page={{customer_list.number}}" class="status-form">
+                            <button type="button" 
+                                    class="btn-notes" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#notesModal{{item.id}}">
+                                <i class="fa-solid fa-clipboard-list"></i> Notes
+                            </button>
+                        </td>
+                        <td>
+                            <form method="POST" action="{% url 'customer-list' %}?page={{customer_list.number}}&status={{active_status_value}}&customer_filter={{active_filter}}" class="status-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="customer_id" value="{{item.id}}">
                                 <select name="new_status" onchange="this.form.submit()" class="status-select status-{{item.lead_status}}">
@@ -104,6 +113,18 @@
                         </td>
                     {% else %}
                         <td>{{item.assigned_user|default:"Not Assigned"}}</td>
+                        <td>
+                            <button type="button" 
+                                    class="btn-notes-pill" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#notesModal{{item.id}}">
+                                <i class="fa-regular fa-comment-dots"></i>
+                                <span>View Notes</span>
+                                {% if item.notes.count > 0 %}
+                                    <span class="notes-count">{{ item.notes.count }}</span>
+                                {% endif %}
+                            </button>
+                        </td>
                         <td>
                             <span class="badge status-{{item.lead_status}}">
                                 {{item.get_lead_status_display}}
@@ -159,7 +180,7 @@
 
                                     <div class="col-6 text-end">
                                         <label class="text-muted small d-block">Category</label>
-                                        <span class="badge bg-info text-dark">{{item.favorite_category}}</span>
+                                        <span class="badge bg-info text-dark">{{item.get_favorite_category_display}}</span>
                                     </div>
 
                                     <hr class="my-3 opacity-10">
@@ -216,6 +237,80 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal for Adding Note  -->
+                {% if user.is_superuser %}
+                <div class="modal fade" id="notesModal{{item.id}}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0">
+                            <div class="modal-header bg-dark text-white">
+                                <h5 class="modal-title"><i class="fa-regular fa-comments me-2"></i> Notes for {{item.name}}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            
+                            <div class="modal-body">
+                                <div class="notes-history mb-4">
+                                    {% for note in item.interactions.all %}
+                                        <div class="note-item">
+                                            <div class="note-meta">
+                                                <strong>Staff : {{ note.customer.assigned_user }}</strong> 
+                                                <span>{{ note.created_at|date:"M d, H:i" }}</span>
+                                            </div>
+                                            <div class="note-content">{{ note.note }}</div>
+                                        </div>
+                                    {% empty %}
+                                        <div class="text-center text-muted py-3">
+                                            <i class="fa-solid fa-ghost d-block mb-2"></i> No notes yet.
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 {% else %}
+                 <div class="modal fade" id="notesModal{{item.id}}" tabindex="-1" aria-hidden="true">
+                     <div class="modal-dialog modal-dialog-centered">
+                         <div class="modal-content border-0">
+                             <div class="modal-header bg-dark text-white">
+                                 <h5 class="modal-title"><i class="fa-regular fa-comments me-2"></i> Notes for {{item.name}}</h5>
+                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                             </div>
+                             
+                             <div class="modal-body">
+                                 <div class="notes-history mb-4">
+                                     {% for note in item.interactions.all %}
+                                         <div class="note-item">
+                                             <div class="note-meta">
+                                                 <strong>You</strong> 
+                                                 <span>{{ note.created_at|date:"M d, H:i" }}</span>
+                                             </div>
+                                             <div class="note-content">{{ note.note }}</div>
+                                         </div>
+                                     {% empty %}
+                                         <div class="text-center text-muted py-3">
+                                             <i class="fa-solid fa-ghost d-block mb-2"></i> No notes yet.
+                                         </div>
+                                     {% endfor %}
+                                 </div>
+ 
+                                 <form action="" method="POST">
+                                     {% csrf_token %}
+                                     <div class="form-group">
+                                         <input type="hidden" name="customer_id" value="{{item.id}}">
+                                         <label class="small fw-bold text-muted mb-1">ADD NEW NOTE</label>
+                                         <textarea name="note_body" class="form-control" rows="3" placeholder="Type interaction details here..." required></textarea>
+                                     </div>
+                                     <div class="mt-3 text-end">
+                                         <button type="submit" class="btn btn-primary btn-sm px-4">Save Note</button>
+                                     </div>
+                                 </form>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 {% endif %}     
+
                 {% endfor %}
             </tbody>
         </table>

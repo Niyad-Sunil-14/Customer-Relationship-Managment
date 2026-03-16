@@ -1,12 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from datetime import timezone
 # Create your models here.
 
 
 CATEGORY_CHOICES = [
     ('product', 'Product'),
     ('services', 'Services'),
+    ('real_estate', 'Real Estate'),
+    ('finance', 'Finance'),
+    ('tech', 'Technology'),
+    ('retail', 'Retail'),
+    ('other', 'Other'),
 ]
 
 class Customer(models.Model):
@@ -28,3 +33,15 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
+class Interaction(models.Model):
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name='interactions'
+    )
+    note = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Interaction with {self.customer.name}"

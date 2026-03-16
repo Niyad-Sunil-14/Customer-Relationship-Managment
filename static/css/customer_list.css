@@ -267,3 +267,108 @@ tr:hover {
 .page-link:hover:not(.active) {
     background-color: #f0f0f0;
 }
+
+
+/* Table Button Style */
+.btn-notes {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-notes:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Modal Internal Styling */
+.notes-history {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.note-item {
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+}
+
+.note-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    margin-bottom: 5px;
+}
+
+.note-meta strong { color: #1e293b; }
+.note-meta span { color: #64748b; }
+
+.note-content {
+    font-size: 0.85rem;
+    color: #334155;
+    line-height: 1.4;
+}
+
+/* Custom Scrollbar for Notes */
+.notes-history::-webkit-scrollbar { width: 5px; }
+.notes-history::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+
+
+
+
+
+
+.btn-notes-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 4px 12px;
+    border-radius: 50px;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.btn-notes-pill:hover {
+    background: #f8fafc;
+    border-color: #3b82f6;
+    color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-notes-pill i {
+    font-size: 0.9rem;
+}
+
+/* The small counter bubble */
+.notes-count {
+    background: #3b82f6;
+    color: white;
+    font-size: 0.65rem;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-left: 2px;
+}
+
+
+
