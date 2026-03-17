@@ -372,3 +372,26 @@ tr:hover {
 
 
 
+.empty-row {
+    text-align: center;
+    padding: 60px 0 !important;
+}
+
+.empty-state-wrapper i {
+    font-size: 3rem;
+    color: #e2e8f0;
+    margin-bottom: 15px;
+}
+
+.empty-state-wrapper p {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.btn-clear {
+    display: inline-block;
+    margin-top: 10px;
+    color: #4f46e5;
+    text-decoration: underline;
+    font-size: 0.85rem;
+}

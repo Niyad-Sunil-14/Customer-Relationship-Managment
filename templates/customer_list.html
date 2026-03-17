@@ -54,8 +54,10 @@
 
             <div class="toolbar-item">
                 <div class="search-container">
-                    <input type="text" placeholder="Search leads..." class="search-input">
-                    <button class="search-btn">Search</button>
+                    <form action="{% url 'customer-list' %}" method="get">
+                        <input type="text" name="q" value="{{search_q}}" placeholder="Search leads..." class="search-input">
+                        <button type="submit" class="search-btn">Search</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -83,235 +85,250 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in customer_list %}
-                <tr>
-                    <td>{{item.name}}</td>
-                    <td>{{item.company}}</td>
-                    <td>{{item.email}}</td>
-                    {% if not user.is_superuser %}
-                        <td>{{item.phone}}</td>
-                        <td>
-                            <button type="button" 
-                                    class="btn-notes" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#notesModal{{item.id}}">
-                                <i class="fa-solid fa-clipboard-list"></i> Notes
-                            </button>
-                        </td>
-                        <td>
-                            <form method="POST" action="{% url 'customer-list' %}?page={{customer_list.number}}&status={{active_status_value}}&customer_filter={{active_filter}}" class="status-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="customer_id" value="{{item.id}}">
-                                <select name="new_status" onchange="this.form.submit()" class="status-select status-{{item.lead_status}}">
-                                    {% for code, name in item.LEAD_STATUS %}
-                                        <option value="{{ code }}" {% if item.lead_status == code %}selected{% endif %}>
-                                            {{ name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </form>
-                        </td>
-                    {% else %}
-                        <td>{{item.assigned_user|default:"Not Assigned"}}</td>
-                        <td>
-                            <button type="button" 
-                                    class="btn-notes-pill" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#notesModal{{item.id}}">
-                                <i class="fa-regular fa-comment-dots"></i>
-                                <span>View Notes</span>
-                                {% if item.notes.count > 0 %}
-                                    <span class="notes-count">{{ item.notes.count }}</span>
-                                {% endif %}
-                            </button>
-                        </td>
-                        <td>
-                            <span class="badge status-{{item.lead_status}}">
-                                {{item.get_lead_status_display}}
-                            </span>
-                        </td>
-                    {% endif %}
-                    <td class="action-group">
-                        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{item.id}}" class="action-btn btn-view" title="View Details">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                        
-                        <a href="{% url 'edit-customer' item.id %}" class="action-btn btn-edit" title="Edit Customer">
-                            <i class="fa-regular fa-pen-to-square"></i>
-                        </a>
-                        
-                        {% if user.is_superuser %}
-                       <button type="button" data-bs-toggle="modal" data-bs-target="#delete{{item.id}}" class="action-btn btn-delete" title="Delete Customer">
-                            <i class="fa-regular fa-trash-can"></i>
-                       </button>
-                        {% endif %}
-                    </td>
-                </tr>
-                
-                <!-- Modal for view -->
-                <div class="modal fade" id="exampleModal{{item.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered"> <div class="modal-content border-0 shadow-lg"> <div class="modal-header bg-dark text-white py-3">
-                                <h5 class="modal-title d-flex align-items-center" id="exampleModalLabel">
-                                    <i class="fa-solid fa-user-circle me-2"></i> Profile: {{item.name}}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-
-                            <div class="modal-body p-4">
-                                <div class="row g-3"> <div class="col-12 border-bottom pb-3 mb-2">
-                                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Customer ID</small>
-                                        <p class="mb-0 fw-bold text-primary">#{{item.id}}</p>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label class="text-muted small d-block">Email</label>
-                                        <span class="fw-semibold text-break">{{item.email}}</span>
-                                    </div>
-
-                                    <div class="col-6 text-end">
-                                        <label class="text-muted small d-block">Phone</label>
-                                        <span class="fw-semibold">{{item.phone}}</span>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label class="text-muted small d-block">Company</label>
-                                        <span class="fw-semibold"><i class="fa-solid fa-building me-1 text-secondary"></i> {{item.company}}</span>
-                                    </div>
-
-                                    <div class="col-6 text-end">
-                                        <label class="text-muted small d-block">Category</label>
-                                        <span class="badge bg-info text-dark">{{item.get_favorite_category_display}}</span>
-                                    </div>
-
-                                    <hr class="my-3 opacity-10">
-
-                                    <div class="col-12 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <label class="text-muted small d-block">Lead Status</label>
-                                            <span class="badge status-{{item.lead_status}} p-2">
-                                                {{item.get_lead_status_display}}
-                                            </span>
-                                        </div>
-                                        <div class="text-end">
-                                            <label class="text-muted small d-block">Assigned To</label>
-                                            <span class="fw-bold text-dark">
-                                                <i class="fa-solid fa-user-tie me-1"></i> {{item.assigned_user|default:"Unassigned"}}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 mt-3 bg-light p-2 rounded text-center">
-                                        <small class="text-muted">Member since: <strong>{{item.created_at|date:"M d, Y"}}</strong></small>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div class="modal-footer border-0">
-                                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal for delete -->
-                <div class="modal fade" id="delete{{item.id}}" tabindex="-1" aria-labelledby="delete" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Confirm Delete</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Are you sure you want to delete <strong>{{item.name}}</strong>?</p>
-                                <p class="text-danger small">This action cannot be undone.</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                {% if customer_list %}
+                    {% for item in customer_list %}
+                        <tr>
+                            <td>{{item.name}}</td>
+                            <td>{{item.company}}</td>
+                            <td>{{item.email}}</td>
+                            {% if not user.is_superuser %}
+                                <td>{{item.phone}}</td>
+                                <td>
+                                    <button type="button" 
+                                            class="btn-notes" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#notesModal{{item.id}}">
+                                        <i class="fa-solid fa-clipboard-list"></i> Notes
+                                    </button>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{% url 'customer-list' %}?page={{customer_list.number}}&status={{active_status_value}}&customer_filter={{active_filter}}" class="status-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="customer_id" value="{{item.id}}">
+                                        <select name="new_status" onchange="this.form.submit()" class="status-select status-{{item.lead_status}}">
+                                            {% for code, name in item.LEAD_STATUS %}
+                                                <option value="{{ code }}" {% if item.lead_status == code %}selected{% endif %}>
+                                                    {{ name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </td>
+                            {% else %}
+                                <td>{{item.assigned_user|default:"Not Assigned"}}</td>
+                                <td>
+                                    <button type="button" 
+                                            class="btn-notes-pill" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#notesModal{{item.id}}">
+                                        <i class="fa-regular fa-comment-dots"></i>
+                                        <span>View Notes</span>
+                                        {% if item.notes.count > 0 %}
+                                            <span class="notes-count">{{ item.notes.count }}</span>
+                                        {% endif %}
+                                    </button>
+                                </td>
+                                <td>
+                                    <span class="badge status-{{item.lead_status}}">
+                                        {{item.get_lead_status_display}}
+                                    </span>
+                                </td>
+                            {% endif %}
+                            <td class="action-group">
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{item.id}}" class="action-btn btn-view" title="View Details">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
                                 
-                                <form action="{% url 'delete-customer' item.id %}" method="POST" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                <a href="{% url 'edit-customer' item.id %}" class="action-btn btn-edit" title="Edit Customer">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                </a>
+                                
+                                {% if user.is_superuser %}
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#delete{{item.id}}" class="action-btn btn-delete" title="Delete Customer">
+                                    <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        
+                        <!-- Modal for view -->
+                        <div class="modal fade" id="exampleModal{{item.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered"> <div class="modal-content border-0 shadow-lg"> <div class="modal-header bg-dark text-white py-3">
+                                        <h5 class="modal-title d-flex align-items-center" id="exampleModalLabel">
+                                            <i class="fa-solid fa-user-circle me-2"></i> Profile: {{item.name}}
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
 
-                <!-- Modal for Adding Note  -->
-                {% if user.is_superuser %}
-                <div class="modal fade" id="notesModal{{item.id}}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content border-0">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title"><i class="fa-regular fa-comments me-2"></i> Notes for {{item.name}}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            
-                            <div class="modal-body">
-                                <div class="notes-history mb-4">
-                                    {% for note in item.interactions.all %}
-                                        <div class="note-item">
-                                            <div class="note-meta">
-                                                <strong>Staff : {{ note.customer.assigned_user }}</strong> 
-                                                <span>{{ note.created_at|date:"M d, H:i" }}</span>
+                                    <div class="modal-body p-4">
+                                        <div class="row g-3"> <div class="col-12 border-bottom pb-3 mb-2">
+                                                <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Customer ID</small>
+                                                <p class="mb-0 fw-bold text-primary">#{{item.id}}</p>
                                             </div>
-                                            <div class="note-content">{{ note.note }}</div>
+
+                                            <div class="col-6">
+                                                <label class="text-muted small d-block">Email</label>
+                                                <span class="fw-semibold text-break">{{item.email}}</span>
+                                            </div>
+
+                                            <div class="col-6 text-end">
+                                                <label class="text-muted small d-block">Phone</label>
+                                                <span class="fw-semibold">{{item.phone}}</span>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <label class="text-muted small d-block">Company</label>
+                                                <span class="fw-semibold"><i class="fa-solid fa-building me-1 text-secondary"></i> {{item.company}}</span>
+                                            </div>
+
+                                            <div class="col-6 text-end">
+                                                <label class="text-muted small d-block">Category</label>
+                                                <span class="badge bg-info text-dark">{{item.get_favorite_category_display}}</span>
+                                            </div>
+
+                                            <hr class="my-3 opacity-10">
+
+                                            <div class="col-12 d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <label class="text-muted small d-block">Lead Status</label>
+                                                    <span class="badge status-{{item.lead_status}} p-2">
+                                                        {{item.get_lead_status_display}}
+                                                    </span>
+                                                </div>
+                                                <div class="text-end">
+                                                    <label class="text-muted small d-block">Assigned To</label>
+                                                    <span class="fw-bold text-dark">
+                                                        <i class="fa-solid fa-user-tie me-1"></i> {{item.assigned_user|default:"Unassigned"}}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-3 bg-light p-2 rounded text-center">
+                                                <small class="text-muted">Member since: <strong>{{item.created_at|date:"M d, Y"}}</strong></small>
+                                            </div>
+
                                         </div>
-                                    {% empty %}
-                                        <div class="text-center text-muted py-3">
-                                            <i class="fa-solid fa-ghost d-block mb-2"></i> No notes yet.
-                                        </div>
-                                    {% endfor %}
+                                    </div>
+
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                 {% else %}
-                 <div class="modal fade" id="notesModal{{item.id}}" tabindex="-1" aria-hidden="true">
-                     <div class="modal-dialog modal-dialog-centered">
-                         <div class="modal-content border-0">
-                             <div class="modal-header bg-dark text-white">
-                                 <h5 class="modal-title"><i class="fa-regular fa-comments me-2"></i> Notes for {{item.name}}</h5>
-                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                             </div>
-                             
-                             <div class="modal-body">
-                                 <div class="notes-history mb-4">
-                                     {% for note in item.interactions.all %}
-                                         <div class="note-item">
-                                             <div class="note-meta">
-                                                 <strong>You</strong> 
-                                                 <span>{{ note.created_at|date:"M d, H:i" }}</span>
-                                             </div>
-                                             <div class="note-content">{{ note.note }}</div>
-                                         </div>
-                                     {% empty %}
-                                         <div class="text-center text-muted py-3">
-                                             <i class="fa-solid fa-ghost d-block mb-2"></i> No notes yet.
-                                         </div>
-                                     {% endfor %}
-                                 </div>
- 
-                                 <form action="" method="POST">
-                                     {% csrf_token %}
-                                     <div class="form-group">
-                                         <input type="hidden" name="customer_id" value="{{item.id}}">
-                                         <label class="small fw-bold text-muted mb-1">ADD NEW NOTE</label>
-                                         <textarea name="note_body" class="form-control" rows="3" placeholder="Type interaction details here..." required></textarea>
-                                     </div>
-                                     <div class="mt-3 text-end">
-                                         <button type="submit" class="btn btn-primary btn-sm px-4">Save Note</button>
-                                     </div>
-                                 </form>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
-                 {% endif %}     
 
-                {% endfor %}
+                        <!-- Modal for delete -->
+                        <div class="modal fade" id="delete{{item.id}}" tabindex="-1" aria-labelledby="delete" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Delete</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Are you sure you want to delete <strong>{{item.name}}</strong>?</p>
+                                        <p class="text-danger small">This action cannot be undone.</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        
+                                        <form action="{% url 'delete-customer' item.id %}" method="POST" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal for Adding Note  -->
+                        {% if user.is_superuser %}
+                            <div class="modal fade" id="notesModal{{item.id}}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title"><i class="fa-regular fa-comments me-2"></i> Notes for {{item.name}}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        
+                                        <div class="modal-body">
+                                            <div class="notes-history mb-4">
+                                                {% for note in item.interactions.all %}
+                                                    <div class="note-item">
+                                                        <div class="note-meta">
+                                                            <strong>Staff : {{ note.customer.assigned_user }}</strong> 
+                                                            <span>{{ note.created_at|date:"M d, H:i" }}</span>
+                                                        </div>
+                                                        <div class="note-content">{{ note.note }}</div>
+                                                    </div>
+                                                {% empty %}
+                                                    <div class="text-center text-muted py-3">
+                                                        <i class="fa-solid fa-ghost d-block mb-2"></i> No notes yet.
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="modal fade" id="notesModal{{item.id}}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title"><i class="fa-regular fa-comments me-2"></i> Notes for {{item.name}}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        
+                                        <div class="modal-body">
+                                            <div class="notes-history mb-4">
+                                                {% for note in item.interactions.all %}
+                                                    <div class="note-item">
+                                                        <div class="note-meta">
+                                                            <strong>You</strong> 
+                                                            <span>{{ note.created_at|date:"M d, H:i" }}</span>
+                                                        </div>
+                                                        <div class="note-content">{{ note.note }}</div>
+                                                    </div>
+                                                {% empty %}
+                                                    <div class="text-center text-muted py-3">
+                                                        <i class="fa-solid fa-ghost d-block mb-2"></i> No notes yet.
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+            
+                                            <form action="" method="POST">
+                                                {% csrf_token %}
+                                                <div class="form-group">
+                                                    <input type="hidden" name="customer_id" value="{{item.id}}">
+                                                    <label class="small fw-bold text-muted mb-1">ADD NEW NOTE</label>
+                                                    <textarea name="note_body" class="form-control" rows="3" placeholder="Type interaction details here..." required></textarea>
+                                                </div>
+                                                <div class="mt-3 text-end">
+                                                    <button type="submit" class="btn btn-primary btn-sm px-4">Save Note</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}  
+
+                    {% endfor %}
+
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="empty-row">
+                            <div class="empty-state-wrapper">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <p>No customer found...!</p>
+                                {% if request.GET.q or request.GET.status != 'all_category' %}
+                                    <a href="{% url 'customer-list' %}" class="btn-clear">Clear Filters</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -319,8 +336,8 @@
     <!-- Paginator -->
     <div class="pagination-container">
         {% if customer_list.has_previous %}
-            <a href="?page=1&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">&laquo; First</a>
-            <a href="?page={{ customer_list.previous_page_number }}&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">Previous</a>
+            <a href="?page=1&status={{ active_status_value }}&customer_filter={{ active_filter }}&q={{search_q}}" class="page-link">&laquo; First</a>
+            <a href="?page={{ customer_list.previous_page_number }}&status={{ active_status_value }}&customer_filter={{ active_filter }}&q={{search_q}}" class="page-link">Previous</a>
         {% endif %}
 
         <span class="page-link active">
@@ -328,8 +345,8 @@
         </span>
 
         {% if customer_list.has_next %}
-            <a href="?page={{ customer_list.next_page_number }}&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">Next</a>
-            <a href="?page={{ customer_list.paginator.num_pages }}&status={{ active_status_value }}&customer_filter={{ active_filter }}" class="page-link">Last &raquo;</a>
+            <a href="?page={{ customer_list.next_page_number }}&status={{ active_status_value }}&customer_filter={{ active_filter }}&q={{search_q}}" class="page-link">Next</a>
+            <a href="?page={{ customer_list.paginator.num_pages }}&status={{ active_status_value }}&customer_filter={{ active_filter }}&q={{search_q}}" class="page-link">Last &raquo;</a>
         {% endif %}
     </div>
 {% endblock content %}

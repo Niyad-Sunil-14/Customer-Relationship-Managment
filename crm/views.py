@@ -7,8 +7,10 @@ from . forms import CustomerForm
 from . models import Customer,Interaction
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
+@login_required
 def home(request):
     if request.user.is_superuser:
         total_customers = Customer.objects.count()
@@ -32,6 +34,7 @@ def home(request):
         new_lead = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='new')).count()
         lead_lost = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='lost')).count()
         lead_converted = Customer.objects.filter(Q(assigned_user=request.user),Q(lead_status='converted')).count()
+        conversion_percentage = round((lead_converted/your_customers * 100),1) if your_customers > 0 else 0
 
         context ={
             'your_customers':your_customers,
@@ -39,6 +42,7 @@ def home(request):
             'new_lead':new_lead,
             'lead_lost':lead_lost,
             'lead_converted':lead_converted,
+            'conversion_percentage':conversion_percentage,
         }
 
     return render(request,'home.html',context=context)
@@ -154,7 +158,7 @@ def create_customer(request):
     return render(request,'create_customer.html',{'form':form})
 
 
-
+@login_required
 def customer_list(request):
     if not request.user.is_active:
         return redirect('login')
@@ -186,6 +190,10 @@ def customer_list(request):
 
     status_value = request.GET.get('status', 'all_category')
     customer_filter = request.GET.get('customer_filter', 'all')
+    search_q = request.GET.get('q', '')
+
+    if search_q:
+        customers = customers.filter(Q(name__icontains=search_q) | Q(company__icontains=search_q))
 
     if customer_filter == 'assigned':
         customers = customers.filter(assigned_user__isnull=False)
@@ -198,7 +206,7 @@ def customer_list(request):
     paginator = Paginator(customers,items_per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request,'customer_list.html',{'customer_list':page_obj,'active_filter':customer_filter,'active_status_value':status_value})
+    return render(request,'customer_list.html',{'customer_list':page_obj,'active_filter':customer_filter,'active_status_value':status_value,'search_q':search_q})
 
 
 

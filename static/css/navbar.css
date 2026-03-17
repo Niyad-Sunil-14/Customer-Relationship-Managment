@@ -73,3 +73,22 @@
     background-color: #dc3545;
     color: white;
 }
+
+/* The Active State */
+.nav-link.active {
+    color: #007bff; /* Matches your hover color */
+    font-weight: 700;
+    position: relative;
+}
+
+/* Optional: Add a small indicator line under the active link */
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #007bff;
+    border-radius: 2px;
+}
